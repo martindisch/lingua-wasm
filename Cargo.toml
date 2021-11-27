@@ -7,4 +7,4 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-lingua = { path = "../lingua-rs", default-features = false, features = ["german", "english", "french", "italian"] }
+lingua = { path = "../lingua-rs", default-features = false, features = ["german", "english", "french", "italian", "without-rayon"] }
