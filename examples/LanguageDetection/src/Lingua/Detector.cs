@@ -43,6 +43,15 @@ namespace Lingua
             return languageCode;
         }
 
+        public static string GetLanguage(int languageCode) => languageCode switch
+        {
+            1 => "German",
+            2 => "English",
+            3 => "French",
+            4 => "Italian",
+            _ => "Unknown",
+        };
+
         public void Dispose()
         {
             engine.Dispose();
