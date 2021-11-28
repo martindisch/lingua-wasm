@@ -1,3 +1,4 @@
+using Lingua;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,7 @@ namespace DetectionApi
                     "v1",
                     new OpenApiInfo { Title = "DetectionApi", Version = "v1" });
             });
+            services.AddSingleton<Detector>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

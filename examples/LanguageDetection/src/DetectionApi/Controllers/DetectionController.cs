@@ -1,3 +1,4 @@
+using Lingua;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DetectionApi.Controllers
@@ -6,11 +7,20 @@ namespace DetectionApi.Controllers
     [Route("api")]
     public class DetectionController : ControllerBase
     {
+        private readonly Detector detector;
+
+        public DetectionController(Detector detector)
+        {
+            this.detector = detector;
+        }
+
         [HttpPost("v1/detect-language")]
         public DetectionResponse DetectLanguage(
             [FromBody] DetectionRequest request)
         {
-            return new DetectionResponse(request.Text);
+            var detectedLanguageCode = detector.DetectLanguage(request.Text);
+            var detectedLanguage = Detector.GetLanguage(detectedLanguageCode);
+            return new DetectionResponse(detectedLanguage);
         }
     }
 
