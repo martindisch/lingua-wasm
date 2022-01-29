@@ -11,39 +11,34 @@ namespace Lingua
         private readonly Engine engine;
         private readonly Module module;
         private readonly Linker linker;
-        private readonly Store store;
-        private readonly Instance instance;
 
         public Detector()
         {
             engine = new Engine();
             module = Module.FromFile(engine, LibPath);
             linker = new Linker(engine);
-            store = new Store(engine);
-            instance = linker.Instantiate(store, module);
         }
 
         public int DetectLanguage(string input)
         {
-            lock (instance)
-            {
-                var memory = instance.GetMemory(store, "memory");
+            using var store = new Store(engine);
+            var instance = linker.Instantiate(store, module);
+            var memory = instance.GetMemory(store, "memory");
 
-                var alloc = instance.GetFunction(store, "__alloc");
-                var dealloc = instance.GetFunction(store, "__dealloc");
-                var detectLanguage = instance.GetFunction(store, "detect_language");
+            var alloc = instance.GetFunction(store, "__alloc");
+            var dealloc = instance.GetFunction(store, "__dealloc");
+            var detectLanguage = instance.GetFunction(store, "detect_language");
 
-                var utf8Input = Encoding.UTF8.GetBytes(input);
-                var offset = (int)alloc.Invoke(store, utf8Input.Length);
-                var allocatedSlice = memory.GetSpan(store).Slice(offset);
-                utf8Input.AsSpan<byte>().CopyTo(allocatedSlice);
+            var utf8Input = Encoding.UTF8.GetBytes(input);
+            var offset = (int)alloc.Invoke(store, utf8Input.Length);
+            var allocatedSlice = memory.GetSpan(store).Slice(offset);
+            utf8Input.AsSpan<byte>().CopyTo(allocatedSlice);
 
-                var languageCode = (int)detectLanguage.Invoke(store, offset, utf8Input.Length);
+            var languageCode = (int)detectLanguage.Invoke(store, offset, utf8Input.Length);
 
-                dealloc.Invoke(store, offset, utf8Input.Length);
+            dealloc.Invoke(store, offset, utf8Input.Length);
 
-                return languageCode;
-            }
+            return languageCode;
         }
 
         public static string GetLanguage(int languageCode) => languageCode switch
@@ -60,7 +55,6 @@ namespace Lingua
             engine.Dispose();
             module.Dispose();
             linker.Dispose();
-            store.Dispose();
         }
     }
 }
